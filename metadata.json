@@ -1,0 +1,8 @@
+{
+  "name": "OdooERP - Stock, Ventes & Facturation",
+  "description": "Système ERP complet de gestion de stock, ventes (gros & détail), achats, facturation, créances et clients endettés avec support multilingue et mode sombre.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
