@@ -129,9 +129,17 @@ const ERPContext = createContext<ERPContextType | undefined>(undefined);
 export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   
-  const [companySettings, setCompanySettings] = useState<CompanySettings>(() =>
-    loadFromStorage('settings', initialCompanySettings)
-  );
+  const [companySettings, setCompanySettings] = useState<CompanySettings>(() => {
+    const loaded = loadFromStorage('settings', initialCompanySettings);
+    if (!loaded.name || loaded.name.includes('Odoo') || loaded.name.includes('OdooERP')) {
+      return {
+        ...loaded,
+        name: 'WAD-ALGONI Commercial & Distrib',
+        email: loaded.email && loaded.email.includes('odoo') ? 'contact@wad-algoni.com' : (loaded.email || 'contact@wad-algoni.com')
+      };
+    }
+    return loaded;
+  });
 
   const [language, setLanguageState] = useState<Language>(companySettings.language);
   const [theme, setThemeState] = useState<Theme>(companySettings.theme);

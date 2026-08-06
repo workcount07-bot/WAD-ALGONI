@@ -13,11 +13,11 @@ import {
 } from '../types/erp';
 
 export const initialCompanySettings: CompanySettings = {
-  name: "OdooERP Commercial & Distrib",
+  name: "WAD-ALGONI Commercial & Distrib",
   logo: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=150&auto=format&fit=crop&q=80",
   address: "Avenue du Commerce, Quartier des Affaires, BP 1420",
   phone: "+221 33 820 45 67 / +221 77 450 12 34",
-  email: "contact@odoo-erp-distrib.com",
+  email: "contact@wad-algoni.com",
   nif: "NIF-984210357-A",
   rccm: "SN-DKR-2022-B-14589",
   defaultVatRate: 18,
@@ -619,9 +619,9 @@ export const initialStores: string[] = [
 ];
 
 export const initialUsers: User[] = [
-  { id: "usr-1", name: "Amadou Sow", username: "algoni", password: "6326", email: "admin@odoo-erp.com", role: "admin", storeName: "Boutique Principale", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" },
-  { id: "usr-2", name: "Fatou Diop", username: "gestionnaire", password: "mgr123", email: "fatou.manager@odoo-erp.com", role: "manager", storeName: "Boutique Dakar - Centre", assignedProductIds: ["prod-1", "prod-2", "prod-3"], avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80" },
-  { id: "usr-3", name: "Ousmane Ba", username: "magasinier", password: "stock123", email: "ousmane.stock@odoo-erp.com", role: "stockkeeper", storeName: "Boutique Saint-Louis", assignedProductIds: ["prod-2", "prod-4"], avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" },
-  { id: "usr-4", name: "Khady Ndiaye", username: "caissier", password: "cash123", email: "khady.caisse@odoo-erp.com", role: "cashier", storeName: "Boutique Dakar - Centre", assignedProductIds: ["prod-1", "prod-3"], avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" },
-  { id: "usr-5", name: "Modou Faye", username: "comptable", password: "compta123", email: "modou.compta@odoo-erp.com", role: "accountant", storeName: "Boutique Thiès", assignedProductIds: ["prod-5"], avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80" },
+  { id: "usr-1", name: "Amadou Sow", username: "algoni", password: "6326", email: "admin@wad-algoni.com", role: "admin", storeName: "Boutique Principale", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" },
+  { id: "usr-2", name: "Fatou Diop", username: "gestionnaire", password: "mgr123", email: "fatou.manager@wad-algoni.com", role: "manager", storeName: "Boutique Dakar - Centre", assignedProductIds: ["prod-1", "prod-2", "prod-3"], avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80" },
+  { id: "usr-3", name: "Ousmane Ba", username: "magasinier", password: "stock123", email: "ousmane.stock@wad-algoni.com", role: "stockkeeper", storeName: "Boutique Saint-Louis", assignedProductIds: ["prod-2", "prod-4"], avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" },
+  { id: "usr-4", name: "Khady Ndiaye", username: "caissier", password: "cash123", email: "khady.caisse@wad-algoni.com", role: "cashier", storeName: "Boutique Dakar - Centre", assignedProductIds: ["prod-1", "prod-3"], avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" },
+  { id: "usr-5", name: "Modou Faye", username: "comptable", password: "compta123", email: "modou.compta@wad-algoni.com", role: "accountant", storeName: "Boutique Thiès", assignedProductIds: ["prod-5"], avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80" },
 ];
