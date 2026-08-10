@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { subscribeToDoc, updateDocValue } from '../firebase';
 import {
   Product,
   Category,
@@ -183,7 +184,11 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const trimmed = storeName.trim();
     if (!trimmed) return;
     if (!stores.includes(trimmed)) {
-      setStores(prev => [...prev, trimmed]);
+      setStores(prev => {
+        const next = [...prev, trimmed];
+        updateDocValue('stores', next);
+        return next;
+      });
     }
   };
 
@@ -230,6 +235,37 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => { saveToStorage('notifications', notifications); }, [notifications]);
   useEffect(() => { saveToStorage('users', users); }, [users]);
 
+  // Real-time synchronization across all devices via Firebase Firestore
+  useEffect(() => {
+    const unsubSettings = subscribeToDoc<CompanySettings>('settings', (val) => setCompanySettings(val), companySettings);
+    const unsubCategories = subscribeToDoc<Category[]>('categories', (val) => setCategories(val), initialCategories);
+    const unsubProducts = subscribeToDoc<Product[]>('products', (val) => setProducts(val), initialProducts);
+    const unsubSuppliers = subscribeToDoc<Supplier[]>('suppliers', (val) => setSuppliers(val), initialSuppliers);
+    const unsubCustomers = subscribeToDoc<Customer[]>('customers', (val) => setCustomers(val), initialCustomers);
+    const unsubInvoices = subscribeToDoc<Invoice[]>('invoices', (val) => setInvoices(val), initialInvoices);
+    const unsubPurchases = subscribeToDoc<PurchaseOrder[]>('purchases', (val) => setPurchases(val), initialPurchases);
+    const unsubPayments = subscribeToDoc<PaymentRecord[]>('payments', (val) => setPayments(val), initialPayments);
+    const unsubStockMovements = subscribeToDoc<StockMovement[]>('stockMovements', (val) => setStockMovements(val), initialStockMovements);
+    const unsubNotifications = subscribeToDoc<SystemNotification[]>('notifications', (val) => setNotifications(val), initialNotifications);
+    const unsubUsers = subscribeToDoc<User[]>('users', (val) => setUsers(val), initialUsers);
+    const unsubStores = subscribeToDoc<string[]>('stores', (val) => setStores(val), initialStores);
+
+    return () => {
+      unsubSettings();
+      unsubCategories();
+      unsubProducts();
+      unsubSuppliers();
+      unsubCustomers();
+      unsubInvoices();
+      unsubPurchases();
+      unsubPayments();
+      unsubStockMovements();
+      unsubNotifications();
+      unsubUsers();
+      unsubStores();
+    };
+  }, []);
+
   // Handle RTL vs LTR attribute on <html> element
   useEffect(() => {
     const htmlEl = document.documentElement;
@@ -254,28 +290,52 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    setCompanySettings(prev => ({ ...prev, language: lang }));
+    setCompanySettings(prev => {
+      const next = { ...prev, language: lang };
+      updateDocValue('settings', next);
+      return next;
+    });
   };
 
   const setTheme = (t: Theme) => {
     setThemeState(t);
-    setCompanySettings(prev => ({ ...prev, theme: t }));
+    setCompanySettings(prev => {
+      const next = { ...prev, theme: t };
+      updateDocValue('settings', next);
+      return next;
+    });
   };
 
   const updateCompanySettings = (newSettings: Partial<CompanySettings>) => {
-    setCompanySettings(prev => ({ ...prev, ...newSettings }));
+    setCompanySettings(prev => {
+      const next = { ...prev, ...newSettings };
+      updateDocValue('settings', next);
+      return next;
+    });
   };
 
   // Category Actions
   const addCategory = (cat: Omit<Category, 'id'>) => {
     const newCat: Category = { ...cat, id: 'cat-' + Date.now() };
-    setCategories(prev => [...prev, newCat]);
+    setCategories(prev => {
+      const next = [...prev, newCat];
+      updateDocValue('categories', next);
+      return next;
+    });
   };
   const updateCategory = (id: string, cat: Partial<Category>) => {
-    setCategories(prev => prev.map(c => c.id === id ? { ...c, ...cat } : c));
+    setCategories(prev => {
+      const next = prev.map(c => c.id === id ? { ...c, ...cat } : c);
+      updateDocValue('categories', next);
+      return next;
+    });
   };
   const deleteCategory = (id: string) => {
-    setCategories(prev => prev.filter(c => c.id !== id));
+    setCategories(prev => {
+      const next = prev.filter(c => c.id !== id);
+      updateDocValue('categories', next);
+      return next;
+    });
   };
 
   // Product Actions
@@ -285,7 +345,11 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: 'prod-' + Date.now(),
       createdAt: new Date().toISOString().split('T')[0],
     };
-    setProducts(prev => [newProd, ...prev]);
+    setProducts(prev => {
+      const next = [newProd, ...prev];
+      updateDocValue('products', next);
+      return next;
+    });
 
     // Record initial stock entry movement
     if (p.currentStock > 0) {
@@ -305,10 +369,18 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
   const updateProduct = (id: string, p: Partial<Product>) => {
-    setProducts(prev => prev.map(item => item.id === id ? { ...item, ...p } : item));
+    setProducts(prev => {
+      const next = prev.map(item => item.id === id ? { ...item, ...p } : item);
+      updateDocValue('products', next);
+      return next;
+    });
   };
   const deleteProduct = (id: string) => {
-    setProducts(prev => prev.filter(item => item.id !== id));
+    setProducts(prev => {
+      const next = prev.filter(item => item.id !== id);
+      updateDocValue('products', next);
+      return next;
+    });
   };
 
   // Supplier Actions
@@ -319,13 +391,25 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       balance: 0,
       createdAt: new Date().toISOString().split('T')[0],
     };
-    setSuppliers(prev => [newSup, ...prev]);
+    setSuppliers(prev => {
+      const next = [newSup, ...prev];
+      updateDocValue('suppliers', next);
+      return next;
+    });
   };
   const updateSupplier = (id: string, s: Partial<Supplier>) => {
-    setSuppliers(prev => prev.map(item => item.id === id ? { ...item, ...s } : item));
+    setSuppliers(prev => {
+      const next = prev.map(item => item.id === id ? { ...item, ...s } : item);
+      updateDocValue('suppliers', next);
+      return next;
+    });
   };
   const deleteSupplier = (id: string) => {
-    setSuppliers(prev => prev.filter(item => item.id !== id));
+    setSuppliers(prev => {
+      const next = prev.filter(item => item.id !== id);
+      updateDocValue('suppliers', next);
+      return next;
+    });
   };
 
   // Customer Actions
@@ -335,13 +419,25 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: 'cust-' + Date.now(),
       createdAt: new Date().toISOString().split('T')[0],
     };
-    setCustomers(prev => [newCust, ...prev]);
+    setCustomers(prev => {
+      const next = [newCust, ...prev];
+      updateDocValue('customers', next);
+      return next;
+    });
   };
   const updateCustomer = (id: string, c: Partial<Customer>) => {
-    setCustomers(prev => prev.map(item => item.id === id ? { ...item, ...c } : item));
+    setCustomers(prev => {
+      const next = prev.map(item => item.id === id ? { ...item, ...c } : item);
+      updateDocValue('customers', next);
+      return next;
+    });
   };
   const deleteCustomer = (id: string) => {
-    setCustomers(prev => prev.filter(item => item.id !== id));
+    setCustomers(prev => {
+      const next = prev.filter(item => item.id !== id);
+      updateDocValue('customers', next);
+      return next;
+    });
   };
 
   // User Actions
@@ -353,11 +449,19 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       password: u.password || '123456',
       avatar: u.avatar || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80`
     };
-    setUsers(prev => [...prev, newUser]);
+    setUsers(prev => {
+      const next = [...prev, newUser];
+      updateDocValue('users', next);
+      return next;
+    });
   };
 
   const updateUser = (id: string, u: Partial<User>) => {
-    setUsers(prev => prev.map(item => item.id === id ? { ...item, ...u } : item));
+    setUsers(prev => {
+      const next = prev.map(item => item.id === id ? { ...item, ...u } : item);
+      updateDocValue('users', next);
+      return next;
+    });
     if (currentUser.id === id) {
       setCurrentUser(prev => ({ ...prev, ...u }));
     }
@@ -368,7 +472,11 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       alert("Impossible de supprimer l'utilisateur actuellement connecté.");
       return;
     }
-    setUsers(prev => prev.filter(item => item.id !== id));
+    setUsers(prev => {
+      const next = prev.filter(item => item.id !== id);
+      updateDocValue('users', next);
+      return next;
+    });
   };
 
   // Auth Actions
@@ -480,61 +588,73 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 16);
     
     invoiceData.items.forEach(item => {
-      setProducts(prev => prev.map(p => {
-        if (p.id === item.productId) {
-          const newStock = Math.max(0, p.currentStock - item.quantity);
-          
-          // Check stock alerts
-          if (newStock === 0) {
-            setNotifications(nPrev => [
-              {
-                id: 'notif-' + Date.now() + Math.random(),
-                type: 'out_of_stock',
-                title: 'Rupture de Stock',
-                message: `Le produit ${p.name} est à présent en rupture de stock !`,
-                date: nowStr,
-                read: false,
-                severity: 'danger',
-                linkTab: 'products'
-              },
-              ...nPrev
-            ]);
-          } else if (newStock <= p.minStock) {
-            setNotifications(nPrev => [
-              {
-                id: 'notif-' + Date.now() + Math.random(),
-                type: 'low_stock',
-                title: 'Stock Faible',
-                message: `Le produit ${p.name} a atteint son seuil minimum (${newStock}/${p.minStock}).`,
-                date: nowStr,
-                read: false,
-                severity: 'warning',
-                linkTab: 'inventory'
-              },
-              ...nPrev
-            ]);
+      setProducts(prev => {
+        const next = prev.map(p => {
+          if (p.id === item.productId) {
+            const newStock = Math.max(0, p.currentStock - item.quantity);
+            
+            // Check stock alerts
+            if (newStock === 0) {
+              setNotifications(nPrev => {
+                const nNext = [
+                  {
+                    id: 'notif-' + Date.now() + Math.random(),
+                    type: 'out_of_stock' as const,
+                    title: 'Rupture de Stock',
+                    message: `Le produit ${p.name} est à présent en rupture de stock !`,
+                    date: nowStr,
+                    read: false,
+                    severity: 'danger' as const,
+                    linkTab: 'products'
+                  },
+                  ...nPrev
+                ];
+                updateDocValue('notifications', nNext);
+                return nNext;
+              });
+            } else if (newStock <= p.minStock) {
+              setNotifications(nPrev => {
+                const nNext = [
+                  {
+                    id: 'notif-' + Date.now() + Math.random(),
+                    type: 'low_stock' as const,
+                    title: 'Stock Faible',
+                    message: `Le produit ${p.name} a atteint son seuil minimum (${newStock}/${p.minStock}).`,
+                    date: nowStr,
+                    read: false,
+                    severity: 'warning' as const,
+                    linkTab: 'inventory'
+                  },
+                  ...nPrev
+                ];
+                updateDocValue('notifications', nNext);
+                return nNext;
+              });
+            }
+
+            // Log stock exit movement
+            addStockMovement({
+              date: nowStr,
+              productId: p.id,
+              productCode: p.code,
+              productName: p.name,
+              type: 'out',
+              quantity: item.quantity,
+              previousStock: p.currentStock,
+              newStock: newStock,
+              reference: invNum,
+              reason: `Vente Facture ${invNum} (${newInvoice.customerName})`,
+              location: p.location,
+              performedBy: currentUser.name,
+            });
+
+            return { ...p, currentStock: newStock };
           }
-
-          // Log stock exit movement
-          addStockMovement({
-            date: nowStr,
-            productId: p.id,
-            productCode: p.code,
-            productName: p.name,
-            type: 'out',
-            quantity: item.quantity,
-            previousStock: p.currentStock,
-            newStock: newStock,
-            reference: invNum,
-            reason: `Vente Facture ${invNum} (${newInvoice.customerName})`,
-            location: p.location,
-            performedBy: currentUser.name,
-          });
-
-          return { ...p, currentStock: newStock };
-        }
-        return p;
-      }));
+          return p;
+        });
+        updateDocValue('products', next);
+        return next;
+      });
     });
 
     // Record immediate payment log if paidAmount > 0
@@ -554,7 +674,11 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     }
 
-    setInvoices(prev => [newInvoice, ...prev]);
+    setInvoices(prev => {
+      const next = [newInvoice, ...prev];
+      updateDocValue('invoices', next);
+      return next;
+    });
     return newInvoice;
   };
 
@@ -573,38 +697,46 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Increase product stock & log stock entry
     purchaseData.items.forEach(item => {
-      setProducts(prev => prev.map(p => {
-        if (p.id === item.productId) {
-          const newStock = p.currentStock + item.quantity;
-          
-          addStockMovement({
-            date: nowStr,
-            productId: p.id,
-            productCode: p.code,
-            productName: p.name,
-            type: 'in',
-            quantity: item.quantity,
-            previousStock: p.currentStock,
-            newStock: newStock,
-            reference: poNum,
-            reason: `Réception Achat Bon ${poNum} (${newPO.supplierName})`,
-            location: p.location,
-            performedBy: currentUser.name,
-          });
+      setProducts(prev => {
+        const next = prev.map(p => {
+          if (p.id === item.productId) {
+            const newStock = p.currentStock + item.quantity;
+            
+            addStockMovement({
+              date: nowStr,
+              productId: p.id,
+              productCode: p.code,
+              productName: p.name,
+              type: 'in',
+              quantity: item.quantity,
+              previousStock: p.currentStock,
+              newStock: newStock,
+              reference: poNum,
+              reason: `Réception Achat Bon ${poNum} (${newPO.supplierName})`,
+              location: p.location,
+              performedBy: currentUser.name,
+            });
 
-          return { ...p, currentStock: newStock, buyPrice: item.unitCost };
-        }
-        return p;
-      }));
+            return { ...p, currentStock: newStock, buyPrice: item.unitCost };
+          }
+          return p;
+        });
+        updateDocValue('products', next);
+        return next;
+      });
     });
 
     // Update supplier balance (debt owed to supplier = remainingAmount)
-    setSuppliers(prev => prev.map(s => {
-      if (s.id === newPO.supplierId) {
-        return { ...s, balance: s.balance + newPO.remainingAmount };
-      }
-      return s;
-    }));
+    setSuppliers(prev => {
+      const next = prev.map(s => {
+        if (s.id === newPO.supplierId) {
+          return { ...s, balance: s.balance + newPO.remainingAmount };
+        }
+        return s;
+      });
+      updateDocValue('suppliers', next);
+      return next;
+    });
 
     // Record payment if paidAmount > 0
     if (newPO.paidAmount > 0) {
@@ -623,22 +755,30 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     }
 
-    setPurchases(prev => [newPO, ...prev]);
+    setPurchases(prev => {
+      const next = [newPO, ...prev];
+      updateDocValue('purchases', next);
+      return next;
+    });
 
     // Send notification
-    setNotifications(prev => [
-      {
-        id: 'notif-' + Date.now(),
-        type: 'new_purchase',
-        title: 'Nouveau Bon d\'Achat',
-        message: `Bon d'achat ${poNum} enregistré pour ${newPO.supplierName} (${newPO.totalAmount.toLocaleString()} CFA).`,
-        date: nowStr,
-        read: false,
-        severity: 'info',
-        linkTab: 'purchases',
-      },
-      ...prev
-    ]);
+    setNotifications(prev => {
+      const next = [
+        {
+          id: 'notif-' + Date.now(),
+          type: 'new_purchase' as const,
+          title: 'Nouveau Bon d\'Achat',
+          message: `Bon d'achat ${poNum} enregistré pour ${newPO.supplierName} (${newPO.totalAmount.toLocaleString()} CFA).`,
+          date: nowStr,
+          read: false,
+          severity: 'info' as const,
+          linkTab: 'purchases',
+        },
+        ...prev
+      ];
+      updateDocValue('notifications', next);
+      return next;
+    });
 
     return newPO;
   };
@@ -654,56 +794,76 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (paymentData.type === 'sale') {
       // Update invoice paid & remaining amounts
-      setInvoices(prev => prev.map(inv => {
-        if (inv.id === paymentData.targetId) {
-          const newPaid = inv.paidAmount + paymentData.amount;
-          const newRemaining = Math.max(0, inv.totalAmount - newPaid);
-          let newStatus = inv.status;
-          if (newRemaining === 0) newStatus = 'paid';
-          else if (newPaid > 0) newStatus = 'partial';
-          return { ...inv, paidAmount: newPaid, remainingAmount: newRemaining, status: newStatus };
-        }
-        return inv;
-      }));
+      setInvoices(prev => {
+        const next = prev.map(inv => {
+          if (inv.id === paymentData.targetId) {
+            const newPaid = inv.paidAmount + paymentData.amount;
+            const newRemaining = Math.max(0, inv.totalAmount - newPaid);
+            let newStatus = inv.status;
+            if (newRemaining === 0) newStatus = 'paid';
+            else if (newPaid > 0) newStatus = 'partial';
+            return { ...inv, paidAmount: newPaid, remainingAmount: newRemaining, status: newStatus };
+          }
+          return inv;
+        });
+        updateDocValue('invoices', next);
+        return next;
+      });
     } else {
       // Update purchase paid & remaining amounts
-      setPurchases(prev => prev.map(po => {
-        if (po.id === paymentData.targetId) {
-          const newPaid = po.paidAmount + paymentData.amount;
-          const newRemaining = Math.max(0, po.totalAmount - newPaid);
-          let newStatus = po.status;
-          if (newRemaining === 0) newStatus = 'paid';
-          else if (newPaid > 0) newStatus = 'partial';
-          return { ...po, paidAmount: newPaid, remainingAmount: newRemaining, status: newStatus };
-        }
-        return po;
-      }));
+      setPurchases(prev => {
+        const next = prev.map(po => {
+          if (po.id === paymentData.targetId) {
+            const newPaid = po.paidAmount + paymentData.amount;
+            const newRemaining = Math.max(0, po.totalAmount - newPaid);
+            let newStatus = po.status;
+            if (newRemaining === 0) newStatus = 'paid';
+            else if (newPaid > 0) newStatus = 'partial';
+            return { ...po, paidAmount: newPaid, remainingAmount: newRemaining, status: newStatus };
+          }
+          return po;
+        });
+        updateDocValue('purchases', next);
+        return next;
+      });
 
       // Reduce supplier debt balance
-      setSuppliers(prev => prev.map(sup => {
-        if (sup.id === paymentData.entityId) {
-          return { ...sup, balance: Math.max(0, sup.balance - paymentData.amount) };
-        }
-        return sup;
-      }));
+      setSuppliers(prev => {
+        const next = prev.map(sup => {
+          if (sup.id === paymentData.entityId) {
+            return { ...sup, balance: Math.max(0, sup.balance - paymentData.amount) };
+          }
+          return sup;
+        });
+        updateDocValue('suppliers', next);
+        return next;
+      });
     }
 
-    setPayments(prev => [newPay, ...prev]);
+    setPayments(prev => {
+      const next = [newPay, ...prev];
+      updateDocValue('payments', next);
+      return next;
+    });
 
     // Trigger payment notification
-    setNotifications(prev => [
-      {
-        id: 'notif-' + Date.now(),
-        type: 'payment_received',
-        title: 'Paiement Enregistré',
-        message: `Paiement de ${paymentData.amount.toLocaleString()} CFA reçu de ${paymentData.entityName} (${paymentData.targetNumber}).`,
-        date: new Date().toISOString().replace('T', ' ').substring(0, 16),
-        read: false,
-        severity: 'success',
-        linkTab: 'payments',
-      },
-      ...prev
-    ]);
+    setNotifications(prev => {
+      const next = [
+        {
+          id: 'notif-' + Date.now(),
+          type: 'payment_received' as const,
+          title: 'Paiement Enregistré',
+          message: `Paiement de ${paymentData.amount.toLocaleString()} CFA reçu de ${paymentData.entityName} (${paymentData.targetNumber}).`,
+          date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          read: false,
+          severity: 'success' as const,
+          linkTab: 'payments',
+        },
+        ...prev
+      ];
+      updateDocValue('notifications', next);
+      return next;
+    });
 
     return newPay;
   };
@@ -714,29 +874,64 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...mov,
       id: 'mov-' + Date.now(),
     };
-    setStockMovements(prev => [newMov, ...prev]);
+    setStockMovements(prev => {
+      const next = [newMov, ...prev];
+      updateDocValue('stockMovements', next);
+      return next;
+    });
   };
 
   // Notification actions
   const markNotificationAsRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    setNotifications(prev => {
+      const next = prev.map(n => n.id === id ? { ...n, read: true } : n);
+      updateDocValue('notifications', next);
+      return next;
+    });
   };
   const clearAllNotifications = () => {
     setNotifications([]);
+    updateDocValue('notifications', []);
   };
 
   // Reset Demo Data
   const resetDemoData = () => {
     setCompanySettings(initialCompanySettings);
+    updateDocValue('settings', initialCompanySettings);
+
     setCategories(initialCategories);
+    updateDocValue('categories', initialCategories);
+
     setProducts(initialProducts);
+    updateDocValue('products', initialProducts);
+
     setSuppliers(initialSuppliers);
+    updateDocValue('suppliers', initialSuppliers);
+
     setCustomers(initialCustomers);
+    updateDocValue('customers', initialCustomers);
+
     setInvoices(initialInvoices);
+    updateDocValue('invoices', initialInvoices);
+
     setPurchases(initialPurchases);
+    updateDocValue('purchases', initialPurchases);
+
     setPayments(initialPayments);
+    updateDocValue('payments', initialPayments);
+
     setStockMovements(initialStockMovements);
+    updateDocValue('stockMovements', initialStockMovements);
+
     setNotifications(initialNotifications);
+    updateDocValue('notifications', initialNotifications);
+
+    setUsers(initialUsers);
+    updateDocValue('users', initialUsers);
+
+    setStores(initialStores);
+    updateDocValue('stores', initialStores);
+
     localStorage.clear();
   };
 

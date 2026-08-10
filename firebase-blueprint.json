@@ -1,0 +1,12 @@
+{
+  "entities": {
+    "app_data": {
+      "title": "Application State Data",
+      "description": "Realtime state collections for ERP system synchronized across all connected devices",
+      "properties": {
+        "items": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      }
+    }
+  }
+}
