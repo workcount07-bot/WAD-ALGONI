@@ -238,17 +238,17 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Real-time synchronization across all devices via Firebase Firestore
   useEffect(() => {
     const unsubSettings = subscribeToDoc<CompanySettings>('settings', (val) => setCompanySettings(val), companySettings);
-    const unsubCategories = subscribeToDoc<Category[]>('categories', (val) => setCategories(val), initialCategories);
-    const unsubProducts = subscribeToDoc<Product[]>('products', (val) => setProducts(val), initialProducts);
-    const unsubSuppliers = subscribeToDoc<Supplier[]>('suppliers', (val) => setSuppliers(val), initialSuppliers);
-    const unsubCustomers = subscribeToDoc<Customer[]>('customers', (val) => setCustomers(val), initialCustomers);
-    const unsubInvoices = subscribeToDoc<Invoice[]>('invoices', (val) => setInvoices(val), initialInvoices);
-    const unsubPurchases = subscribeToDoc<PurchaseOrder[]>('purchases', (val) => setPurchases(val), initialPurchases);
-    const unsubPayments = subscribeToDoc<PaymentRecord[]>('payments', (val) => setPayments(val), initialPayments);
-    const unsubStockMovements = subscribeToDoc<StockMovement[]>('stockMovements', (val) => setStockMovements(val), initialStockMovements);
-    const unsubNotifications = subscribeToDoc<SystemNotification[]>('notifications', (val) => setNotifications(val), initialNotifications);
-    const unsubUsers = subscribeToDoc<User[]>('users', (val) => setUsers(val), initialUsers);
-    const unsubStores = subscribeToDoc<string[]>('stores', (val) => setStores(val), initialStores);
+    const unsubCategories = subscribeToDoc<Category[]>('categories', (val) => setCategories(val), loadFromStorage('categories', initialCategories));
+    const unsubProducts = subscribeToDoc<Product[]>('products', (val) => setProducts(val), loadFromStorage('products', initialProducts));
+    const unsubSuppliers = subscribeToDoc<Supplier[]>('suppliers', (val) => setSuppliers(val), loadFromStorage('suppliers', initialSuppliers));
+    const unsubCustomers = subscribeToDoc<Customer[]>('customers', (val) => setCustomers(val), loadFromStorage('customers', initialCustomers));
+    const unsubInvoices = subscribeToDoc<Invoice[]>('invoices', (val) => setInvoices(val), loadFromStorage('invoices', initialInvoices));
+    const unsubPurchases = subscribeToDoc<PurchaseOrder[]>('purchases', (val) => setPurchases(val), loadFromStorage('purchases', initialPurchases));
+    const unsubPayments = subscribeToDoc<PaymentRecord[]>('payments', (val) => setPayments(val), loadFromStorage('payments', initialPayments));
+    const unsubStockMovements = subscribeToDoc<StockMovement[]>('stockMovements', (val) => setStockMovements(val), loadFromStorage('stockMovements', initialStockMovements));
+    const unsubNotifications = subscribeToDoc<SystemNotification[]>('notifications', (val) => setNotifications(val), loadFromStorage('notifications', initialNotifications));
+    const unsubUsers = subscribeToDoc<User[]>('users', (val) => setUsers(val), loadFromStorage('users', initialUsers));
+    const unsubStores = subscribeToDoc<string[]>('stores', (val) => setStores(val), loadFromStorage('stores', initialStores));
 
     return () => {
       unsubSettings();
